@@ -1,5 +1,8 @@
 from highlighter import extract_audio, get_loud_segments, create_highlights
 from vosk_recognizer import recognize_audio
+from deepseek_generator import generate_text
+from functions import split_post
+from settings import PROMPT
 
 # Основной скрипт
 if __name__ == "__main__":
@@ -26,3 +29,12 @@ if __name__ == "__main__":
     print()
     test_text = recognize_audio(test_audio)
     print(f"Полный распознанный текст: {test_text}")
+
+    print()
+    print("-----Начало ответа нейросети-----")
+    test_generated_post = generate_text(PROMPT, test_text)
+    print(test_generated_post)
+    print("-----Конец ответа нейросети-----")
+
+    header, content = split_post(test_generated_post)
+    print("\nЗаголовок отдельно:", header)
