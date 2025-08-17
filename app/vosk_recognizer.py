@@ -5,6 +5,9 @@ import wave
 import array
 
 def recognize_audio(audio_file_path):
+    # Отключаем логи Vosk
+    vosk.SetLogLevel(-1)
+
     # Создаем директорию temp, если она не существует
     os.makedirs('./temp', exist_ok=True)
 
@@ -17,6 +20,7 @@ def recognize_audio(audio_file_path):
         exit(1)
 
     # Инициализация модели
+    print("Инициализация модели Vosk...")
     model = vosk.Model(model_path)
 
     # Проверяем существование аудио файла
@@ -32,7 +36,7 @@ def recognize_audio(audio_file_path):
     channels = wf.getnchannels()
     sample_width = wf.getsampwidth()
 
-    print(f"Исходные параметры: {sample_rate} Гц, {channels} канал(ов), {sample_width * 8} бит")
+    print(f"Параметры входного аудиофайла: {sample_rate} Гц, {channels} канал(ов), {sample_width * 8} бит")
 
     # Если аудио стерео, создаем новый файл в моно
     if channels == 2:
@@ -79,7 +83,7 @@ def recognize_audio(audio_file_path):
     results = []
     chunk_size = 4000
 
-    print("Начинаем распознавание...")
+    print("\nНачинаем распознавание...")
 
     while True:
         data_chunk = wf.readframes(chunk_size)
@@ -117,7 +121,3 @@ def recognize_audio(audio_file_path):
 
     # Возвращаем распознанный текст
     return recognized_text
-
-test_audio = './temp/temp_audio.wav'
-test_text = recognize_audio(test_audio)
-print(f"Полный распознанный текст: {test_text}")
