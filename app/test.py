@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from moviepy import VideoFileClip, concatenate_videoclips
 from pydub import AudioSegment
 import numpy as np
@@ -47,7 +46,6 @@ def get_loud_segments(audio_path, threshold=0.02, min_silence_duration=1.0, min_
 
 def create_highlights(video_path, segments, output_dir="highlights"):
     """Соаздет хайлайты."""
-    import os
 
     #             ,           
     os.makedirs(output_dir, exist_ok=True)
