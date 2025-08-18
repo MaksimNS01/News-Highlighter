@@ -132,7 +132,7 @@ def add_previews_to_videos(result_videos_folder, previews_folder):
                 final_clip.close()
 
                 # Удаляем исходное видео
-                os.remove(video_path)
+                delete_file(video_path)
 
                 print(f"Обработано: {filename} → {new_filename}")
 
@@ -170,3 +170,11 @@ def save_json(
 
     print(f"Результат сохранен в {path_to_save}")
     return output_data
+
+def delete_file(audio_temp):
+    # Удаляем временный аудиофайл
+    if os.path.exists(audio_temp):
+        os.remove(audio_temp)
+        print(f"Временный аудиофайл {audio_temp} удален")
+    else:
+        print(f"Аудиофайл {audio_temp} не найден, удаление не выполнено.")

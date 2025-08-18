@@ -4,6 +4,8 @@ import os
 import wave
 import array
 
+from functions import delete_file
+
 def recognize_audio(audio_file_path):
     # Отключаем логи Vosk
     vosk.SetLogLevel(-1)
@@ -106,8 +108,8 @@ def recognize_audio(audio_file_path):
     wf.close()
 
     # Удаляем аудио файлы
-    os.remove(audio_file_path)
-    os.remove(mono_file_path)
+    delete_file(audio_file_path)
+    delete_file(mono_file_path)
 
     # Возвращаем распознанный текст
     return recognized_text
