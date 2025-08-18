@@ -6,24 +6,24 @@ import array
 
 from functions import delete_file
 
-def recognize_audio(audio_file_path):
-    # Отключаем логи Vosk
-    vosk.SetLogLevel(-1)
+def recognize_audio(audio_file_path, model):
+    # # Отключаем логи Vosk
+    # vosk.SetLogLevel(-1)
 
     # Создаем директорию temp, если она не существует
     os.makedirs('./temp', exist_ok=True)
 
-    # Путь до модели
-    model_path = "./models/vosk-model-ru-0.42"
+    # # Путь до модели
+    # model_path = "./models/vosk-model-ru-0.42"
 
-    # Проверяем существование модели
-    if not os.path.exists(model_path):
-        print(f"Модель не найдена по пути: {model_path}")
-        exit(1)
+    # # Проверяем существование модели
+    # if not os.path.exists(model_path):
+    #     print(f"Модель не найдена по пути: {model_path}")
+    #     exit(1)
 
-    # Инициализация модели
-    print("Инициализация модели Vosk...")
-    model = vosk.Model(model_path)
+    # # Инициализация модели
+    # print("Инициализация модели Vosk...")
+    # model = vosk.Model(model_path)
 
     # Проверяем существование аудио файла
     if not os.path.exists(audio_file_path):

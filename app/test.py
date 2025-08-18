@@ -1,18 +1,34 @@
 import os
+import vosk
 from pathlib import Path
 
 from highlighter import extract_audio, get_loud_segments, create_highlights
 from vosk_recognizer import recognize_audio
 from deepseek_generator import generate_text
-from functions import split_post, add_previews_to_videos, save_json, delete_file
-from settings import PROMPT, ADDING_INTRO
+from functions import split_post, add_previews_to_videos, save_json, delete_file, add_title_frame_to_video, smart_split
+from settings import PROMPT, ADDING_INTRO, FONT_TYPE, LEFT_MARGIN, LINE_HEIGHT, FONT_SIZE, BLUE_Y, RED_Y
 
 # Основной скрипт
 if __name__ == "__main__":
     # 0. Пути сохранения
-    input_video = "./media/test_videos/short2.mp4"
+    input_video = "./media/test_videos/short1.mp4"
     audio_temp = "./temp/temp_audio.wav"
     output_video = "./media/result_videos"
+
+    # Путь до модели
+    model_path = "./models/vosk-model-ru-0.42"
+
+    # Проверяем существование модели
+    if not os.path.exists(model_path):
+        print(f"Модель не найдена по пути: {model_path}")
+        exit(1)
+
+    # Отключаем логи Vosk
+    vosk.SetLogLevel(-1)
+
+    # Инициализация модели
+    print("Инициализация модели Vosk...")
+    model = vosk.Model(model_path)
 
     # 1. Создание хайлайтов
     print("\nИзвлечение аудио...")
@@ -38,24 +54,7 @@ if __name__ == "__main__":
             result_videos_folder = video_output_dir,
             previews_folder = "./media/intro",
         )
-
-    # # 3. Распознавание текста
-    # print()
-    # extracted_audio = extract_audio(video_output_dir, audio_temp)
-    # test_text = recognize_audio(extracted_audio)
-    # print(f"Текст успешно распознан: {test_text[:50]}...")
-
-    # # 4. Создание поста для телеграм
-    # print("\nГенерация поста с помощью Deep Seek...")
-    # test_generated_post = generate_text(PROMPT, test_text)
-    # # print(test_generated_post)
-    # header, content = split_post(test_generated_post)
-    # print(f"Пост успешно сгенерирован с заголовком: {header}")
-
-    # # 5. Сохранение метаданных в .json-файл
-    # print("\nСохранение метаданных в .json-файл...")
-    # json_data = save_json(header, segments, test_generated_post, video_output_dir, video_name)
-
+    
     # Обработка всех видеофайлов в папке
     video_files = [f for f in os.listdir(video_output_dir) if f.lower().endswith(('.mp4', '.avi', '.mov', '.mkv'))]
 
@@ -79,8 +78,7 @@ if __name__ == "__main__":
             extracted_audio = extract_audio(video_path, audio_temp)
             
             # 3. Распознавание текста
-            print("\nРаспознавание текста...")
-            recognized_text = recognize_audio(extracted_audio)
+            recognized_text = recognize_audio(extracted_audio, model)
             print(f"Текст успешно распознан: {recognized_text[:50]}...")
             
             # 4. Создание поста для телеграм
@@ -98,6 +96,25 @@ if __name__ == "__main__":
                 video_name=video_name
             )
             
+            # 6. Добавление превью
+            print("\nДобавление превью...")
+            # Разделение заголовка на две части по смыслу
+            first_line, second_line = smart_split(header)
+
+            add_title_frame_to_video(
+                video_path=video_path, 
+                minutes=0, # минута таймкода
+                seconds=15, # секунда таймкода
+                line1=first_line, 
+                line2=second_line,
+                font_type=FONT_TYPE,
+                left_margin=LEFT_MARGIN,
+                line_height=LINE_HEIGHT,
+                font_size=FONT_SIZE,
+                blue_y=BLUE_Y,
+                red_y=RED_Y
+            )
+            
             # Удаляем временный аудиофайл
             delete_file(audio_temp)
                 
@@ -105,4 +122,4 @@ if __name__ == "__main__":
             print(f"\nОшибка при обработке файла {video_file}: {str(e)}")
             continue
 
-    print("\nОбработка всех видео завершена!")
+

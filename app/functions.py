@@ -1,7 +1,9 @@
 import re
 import os
 import json
-from moviepy import VideoFileClip, concatenate_videoclips
+import numpy as np
+from moviepy import VideoFileClip, ImageClip, concatenate_videoclips
+from PIL import Image, ImageDraw, ImageFont
 
 def split_post(post: str) -> tuple[str, str]:
     """
@@ -170,6 +172,103 @@ def save_json(
 
     print(f"Результат сохранен в {path_to_save}")
     return output_data
+
+def add_title_frame_to_video(video_path, minutes, seconds, line1, line2, font_type="arial.ttf", left_margin=0, line_height=80, font_size=64, blue_y=0.6, red_y=0.7):
+    try:
+        # Проверка существования файла
+        if not os.path.exists(video_path):
+            raise FileNotFoundError(f"Видео не найдено: {video_path}")
+
+        # Загрузка видео
+        video = VideoFileClip(video_path)
+        total_duration = video.duration  # в секундах
+
+        # Проверка корректности таймкода
+        target_time = minutes * 60 + seconds
+        if target_time >= total_duration or target_time < 0:
+            raise ValueError("Указанный таймкод выходит за пределы длительности видео.")
+
+        # Извлечение кадра
+        frame = video.get_frame(t=target_time)  # numpy массив
+        frame_img = Image.fromarray(frame)
+        width, height = frame_img.size  # размеры кадра
+
+        # Создание заголовка — рисуем прямо на кадре
+        combined = frame_img.copy()
+        draw = ImageDraw.Draw(combined)
+
+        try:
+            # Попробуем загрузить шрифт
+            font = ImageFont.truetype(font_type, font_size)
+        except Exception as e:
+            # Если не удалось, используем стандартный
+            print(f"Не удалось загрузить шрифт {font_type}, используем стандартный. Ошибка: {e}")
+            font = ImageFont.load_default()
+
+        # Размеры текста
+        bbox1 = draw.textbbox((0, 0), line1, font=font)
+        bbox2 = draw.textbbox((0, 0), line2, font=font)
+        text_width1 = bbox1[2] - bbox1[0]
+        text_width2 = bbox2[2] - bbox2[0]
+
+        # Синий прямоугольник (60% от верха)
+        y1 = int(blue_y * height)
+        draw.rectangle(
+            [left_margin, y1, left_margin + text_width1 + 30, y1 + line_height],
+            fill=(0, 0, 255)
+        )
+        draw.text((left_margin + 15, y1 + 5), line1, font=font, fill=(255, 255, 255))
+
+        # Красный прямоугольник (65% от верха)
+        y2 = int(red_y * height)
+        draw.rectangle(
+            [left_margin, y2, left_margin + text_width2 + 30, y2 + line_height],
+            fill=(255, 0, 0)
+        )
+        draw.text((left_margin + 15, y2 + 5), line2, font=font, fill=(255, 255, 255))
+
+        # Конвертация в numpy массив
+        combined_np = np.array(combined)
+
+        # Создание клипа из кадра с заголовком (длительность 0.5 секунды)
+        title_clip = ImageClip(combined_np)
+        title_clip = title_clip.with_duration(0.5)
+
+        # Склеивание: заголовок + оригинальное видео
+        final_video = concatenate_videoclips([title_clip, video])
+
+        # Сохранение
+        base_dir = os.path.dirname(video_path)
+        base_name = os.path.basename(video_path)
+        name, ext = os.path.splitext(base_name)
+        output_path = os.path.join(base_dir, f"t{name}{ext}")
+
+        final_video.write_videofile(output_path, codec='libx264', audio_codec='aac')
+
+        delete_file(video_path)
+
+        print(f"Видео сохранено: {output_path}")
+
+    except Exception as e:
+        print(f"Ошибка: {e}")
+
+def smart_split(text):
+    words = text.split()
+    if len(words) <= 3:  # For very short headers
+        return text, ""
+    
+    # Try to split at common prepositions
+    for split_at in ['за', 'на', 'о', 'в', 'по', 'для']:
+        if f' {split_at} ' in text:
+            before, after = text.split(f' {split_at} ', 1)
+            return f"{before}", f"{split_at} {after}"
+    
+    # Fallback to middle split at space
+    mid = len(words) // 2
+    for i in range(mid, len(words)):
+        if words[i] in ['и', 'или', 'но']:  # Split at conjunctions
+            return ' '.join(words[:i]), ' '.join(words[i:])
+    return ' '.join(words[:mid]), ' '.join(words[mid:])
 
 def delete_file(audio_temp):
     # Удаляем временный аудиофайл
