@@ -102,16 +102,6 @@ def recognize_audio(audio_file_path):
     # Объединяем все результаты
     recognized_text = ' '.join(results).strip()
 
-    # # Сохраняем распознанный текст в файл ./temp/rt.json
-    # output_data = {
-    #     "recognized_text": recognized_text
-    # }
-
-    # with open('./temp/rt.json', 'w', encoding='utf-8') as output_file:
-    #     json.dump(output_data, output_file, ensure_ascii=False, indent=2)
-
-    # print("Результат сохранен в ./temp/rt.json")
-
     # Закрываем файл
     wf.close()
 
