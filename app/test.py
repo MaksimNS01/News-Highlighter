@@ -115,8 +115,8 @@ if __name__ == "__main__":
                 red_y=RED_Y
             )
             
-            # Удаляем временный аудиофайл
-            delete_file(audio_temp)
+            # # Удаляем временный аудиофайл
+            # delete_file(audio_temp)
                 
         except Exception as e:
             print(f"\nОшибка при обработке файла {video_file}: {str(e)}")

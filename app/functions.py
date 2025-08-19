@@ -116,7 +116,8 @@ def add_previews_to_videos(result_videos_folder, previews_folder):
                 preview_resized = preview_clip.resized((width, height))
 
                 # Конкатенируем: превью + видео
-                final_clip = concatenate_videoclips([preview_resized, video_clip])
+                # final_clip = concatenate_videoclips([preview_resized, video_clip])
+                final_clip = concatenate_videoclips([preview_resized, video_clip, preview_resized])
 
                 # Сохраняем по новому пути
                 final_clip.write_videofile(
