@@ -15,7 +15,7 @@ def extract_audio(video_path, audio_path):
 
     return audio_path
 
-def get_loud_segments(audio_path, threshold=0.02, min_silence_duration=1.5, min_segment_duration=15.0):
+def get_loud_segments(audio_path, threshold=0.03, min_silence_duration=2.0, min_segment_duration=15.0):
     """Анализирует аудио и возвращает временные метки громких сегментов."""
     audio = AudioSegment.from_wav(audio_path)
     samples = np.array(audio.get_array_of_samples()).astype(np.float32)

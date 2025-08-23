@@ -11,7 +11,7 @@ from settings import PROMPT, ADDING_INTRO, FONT_TYPE, LEFT_MARGIN, LINE_HEIGHT, 
 # Основной скрипт
 if __name__ == "__main__":
     # 0. Пути сохранения
-    input_video = "./media/test_videos/short1.mp4"
+    input_video = "./media/test_videos/short3.mp4"
     audio_temp = "./temp/temp_audio.wav"
     output_video = "./media/result_videos"
 
